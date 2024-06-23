@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "sqlserver"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Company {
+  id                String  @id @default(cuid())
+  name              String
+  description       String?
+  subscriptionType  String
+  subscriptionPrice Float
+  email             String  @unique
+  stripeCustomerId  String  @unique
+  example1           Boolean @default(false)
+  example2           Boolean @default(false)
+  secretKey         String
+  users             User[]
+}
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  companyId        String
+  company          Company          @relation(fields: [companyId], references: [id])
+  firstName        String
+  lastName         String
+  phoneNumber      String?
+  username         String           @unique
+  password         String
+  profileImage     String?
+  display          String           @default("light") // "light" or "dark"
+  role             String           @default("user") // "admin", "user", "manager", or "guest"
+  verifiedDevices  VerifiedDevice[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  emailVerify      Boolean          @default(false)
+  verificationCode String? // New field for the verification code
+}
+
+model VerifiedDevice {
+  id        String   @id @default(cuid())
+  deviceId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
